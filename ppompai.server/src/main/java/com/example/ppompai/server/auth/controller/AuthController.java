@@ -1,6 +1,7 @@
 package com.example.ppompai.server.auth.controller;
 
 import com.example.ppompai.server.auth.domain.LoginRequest;
+import com.example.ppompai.server.auth.domain.RefreshRequest;
 import com.example.ppompai.server.auth.domain.SignupRequest;
 import com.example.ppompai.server.auth.domain.TokenDTO;
 import com.example.ppompai.server.auth.service.AuthService;
@@ -27,5 +28,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<?>> login(@RequestBody LoginRequest loginRequest) {
         return authService.login(loginRequest);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<?>> refresh(@RequestBody RefreshRequest refreshRequest) {
+        return authService.refresh(refreshRequest);
     }
 }

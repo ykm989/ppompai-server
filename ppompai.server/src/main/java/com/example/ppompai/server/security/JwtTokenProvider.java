@@ -72,9 +72,9 @@ public class JwtTokenProvider implements InitializingBean {
                 .parseClaimsJws(token).getBody().getSubject();
     }
 
-    public Long getUserEmailByRefresh(String token) {
+    public String getUserEmailByRefresh(String token) {
         String sub = Jwts.parserBuilder().setSigningKey(key).build()
                 .parseClaimsJws(token).getBody().getSubject();
-        return Long.valueOf(sub);
+        return String.valueOf(sub);
     }
 }

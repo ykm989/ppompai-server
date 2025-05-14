@@ -5,7 +5,9 @@ import com.example.ppompai.server.auth.repository.UserRefreshTokenRepository;
 import com.example.ppompai.server.auth.repository.UserRepository;
 import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.security.JwtTokenProvider;
+import com.sun.jdi.request.InvalidRequestStateException;
 import lombok.RequiredArgsConstructor;
+import org.antlr.v4.runtime.Token;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -87,6 +89,46 @@ public class AuthService {
                     .ok(ApiResponse.success(tokenDTO));
         }
         catch (Exception e) {
+            System.out.println(e.getMessage());
+            ApiResponse<Void> body = ApiResponse.error(e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(body);
+        }
+    }
+
+    public ResponseEntity<ApiResponse<?>> refresh(RefreshRequest refreshRequest) {
+        try {
+            String oldRefreshToken = refreshRequest.getRefreshToken();
+
+            if (!jwtTokenProvider.validateToken(oldRefreshToken)) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail("invalid refresh token"));
+            }
+
+            String userEmail = jwtTokenProvider.getUserEmailByRefresh(oldRefreshToken);
+            User user = userRepository.findByEmail(userEmail).orElseThrow(
+                    () -> new InvalidRequestStateException("user does not exist")
+            );
+
+            Optional<UserRefreshToken> refreshTokenOptional = userRefreshTokenRepository
+                    .findById(user.id);
+
+            if (refreshTokenOptional.isEmpty() || refreshTokenOptional.get().equals(oldRefreshToken)) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail("invalid refresh token"));
+            }
+
+            String newAccessToken = jwtTokenProvider.createAccessToken(user);
+            String newRefreshToken = jwtTokenProvider.createRefreshToken(user);
+
+            TokenDTO tokenDTO = new TokenDTO(newAccessToken, newRefreshToken);
+
+            return ResponseEntity
+                    .ok(ApiResponse.success(tokenDTO));
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             ApiResponse<Void> body = ApiResponse.error(e.getMessage());
             return ResponseEntity

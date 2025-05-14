@@ -6,6 +6,7 @@ import com.example.ppompai.server.auth.repository.UserRepository;
 import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 
@@ -20,10 +21,13 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
-    public TokenDTO signup(SignupRequest signupRequest) {
+    public  ResponseEntity<ApiResponse<?>> signup(SignupRequest signupRequest) {
         try {
             if (!userRepository.findByEmail(signupRequest.getEmail()).isEmpty()) {
-                throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+                ApiResponse<Void> body = ApiResponse.fail("email already in use");
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(body);
             }
 
             String encodePw = passwordEncoder.encode(signupRequest.getPassword());
@@ -42,9 +46,18 @@ public class AuthService {
                     null
             );
             userRefreshTokenRepository.save(urt);
+            TokenDTO tokenDTO = new TokenDTO(accessToken, refreshToken);
 
-            return new TokenDTO(accessToken, refreshToken);
+            return ResponseEntity
+                    .ok(ApiResponse.success(tokenDTO));
         } catch (Exception e) {
+            System.out.println(e.getMessage());
+            ApiResponse<Void> body = ApiResponse.error(e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(body);
+        }
+    }
             System.out.println(e.getMessage());
             throw new RuntimeException(e);
         }

@@ -1,5 +1,6 @@
 package com.example.ppompai.server.auth.controller;
 
+import com.example.ppompai.server.auth.domain.LoginRequest;
 import com.example.ppompai.server.auth.domain.SignupRequest;
 import com.example.ppompai.server.auth.domain.TokenDTO;
 import com.example.ppompai.server.auth.service.AuthService;
@@ -19,8 +20,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<TokenDTO>> signUp(@RequestBody SignupRequest signupRequest) {
-        TokenDTO token = authService.signup(signupRequest);
+    public ResponseEntity<ApiResponse<?>> signUp(@RequestBody SignupRequest signupRequest) {
+        return authService.signup(signupRequest);
+    }
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

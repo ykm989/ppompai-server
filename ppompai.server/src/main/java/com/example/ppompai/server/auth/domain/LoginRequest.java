@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class SignupRequest {
+public class LoginRequest {
     @NotBlank
     private String email;
 
@@ -12,5 +12,5 @@ public class SignupRequest {
     private String password;
 
     // 기본 생성자
-    public SignupRequest() {}
+    public LoginRequest() {}
 }

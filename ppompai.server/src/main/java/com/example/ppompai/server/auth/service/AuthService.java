@@ -13,6 +13,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -21,7 +23,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
-    public  ResponseEntity<ApiResponse<?>> signup(SignupRequest signupRequest) {
+    public ResponseEntity<ApiResponse<?>> signup(SignupRequest signupRequest) {
         try {
             if (!userRepository.findByEmail(signupRequest.getEmail()).isEmpty()) {
                 ApiResponse<Void> body = ApiResponse.fail("email already in use");
@@ -58,8 +60,38 @@ public class AuthService {
                     .body(body);
         }
     }
+
+    public ResponseEntity<ApiResponse<?>> login(LoginRequest loginRequest) {
+        try {
+            String encodePw = passwordEncoder.encode(loginRequest.getPassword());
+            Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
+
+            if (userOpt.isEmpty() || !passwordEncoder.matches(loginRequest.getPassword(), userOpt.get().password)) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail("invalid password"));
+            }
+
+            String accessToken = jwtTokenProvider.createAccessToken(userOpt.get());
+            String refreshToken = jwtTokenProvider.createRefreshToken(userOpt.get());
+
+            UserRefreshToken urt = new UserRefreshToken(
+                    userOpt.get().id,
+                    refreshToken,
+                    null
+            );
+            userRefreshTokenRepository.save(urt);
+            TokenDTO tokenDTO = new TokenDTO(accessToken, refreshToken);
+
+            return ResponseEntity
+                    .ok(ApiResponse.success(tokenDTO));
+        }
+        catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            ApiResponse<Void> body = ApiResponse.error(e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(body);
         }
     }
 }

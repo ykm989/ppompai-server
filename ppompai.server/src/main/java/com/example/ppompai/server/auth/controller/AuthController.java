@@ -24,8 +24,8 @@ public class AuthController {
         return authService.signup(signupRequest);
     }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(token));
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
     }
 }

@@ -19,6 +19,7 @@ bin/
 
 ### Spring Boot ###
 application.properties
+application.yml
 
 ### IntelliJ IDEA ###
 .idea

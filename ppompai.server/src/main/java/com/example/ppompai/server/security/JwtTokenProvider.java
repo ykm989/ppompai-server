@@ -1,6 +1,6 @@
 package com.example.ppompai.server.security;
 
-import com.example.ppompai.server.auth.domain.User;
+import com.example.ppompai.server.common.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

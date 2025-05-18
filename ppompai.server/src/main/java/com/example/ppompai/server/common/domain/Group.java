@@ -1,24 +1,32 @@
-package com.example.ppompai.server.auth.domain;
-
+package com.example.ppompai.server.common.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "groups")
+@Builder
+public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(length = 100, nullable = false, unique = true)
-    public String email;
+    @Column(length = 100)
+    public String groupName;
 
-    @Column(length = 100, nullable = false)
-    public String password;
+    @OneToOne
+    private User owner;
+
+    @OneToMany
+    private List<User> members;
+
+    @OneToMany
+    private List<Payment> payments;
 
     @CreationTimestamp
     @Column(updatable = false)

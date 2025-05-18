@@ -10,7 +10,4 @@ public class LoginRequest {
 
     @NotBlank
     private String password;
-
-    // 기본 생성자
-    public LoginRequest() {}
 }

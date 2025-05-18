@@ -4,13 +4,12 @@ import com.example.ppompai.server.auth.domain.*;
 import com.example.ppompai.server.auth.repository.UserRefreshTokenRepository;
 import com.example.ppompai.server.auth.repository.UserRepository;
 import com.example.ppompai.server.common.ApiResponse;
+import com.example.ppompai.server.common.domain.User;
 import com.example.ppompai.server.security.JwtTokenProvider;
 import com.sun.jdi.request.InvalidRequestStateException;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.Token;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

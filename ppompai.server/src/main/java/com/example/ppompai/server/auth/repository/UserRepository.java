@@ -1,6 +1,6 @@
 package com.example.ppompai.server.auth.repository;
 
-import com.example.ppompai.server.auth.domain.User;
+import com.example.ppompai.server.common.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

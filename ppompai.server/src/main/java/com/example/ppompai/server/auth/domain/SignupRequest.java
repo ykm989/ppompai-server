@@ -10,7 +10,4 @@ public class SignupRequest {
 
     @NotBlank
     private String password;
-
-    // 기본 생성자
-    public SignupRequest() {}
 }

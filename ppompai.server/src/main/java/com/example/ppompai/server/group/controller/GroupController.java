@@ -4,13 +4,12 @@ import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.common.domain.Group;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
 import com.example.ppompai.server.group.service.GroupService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -21,5 +20,14 @@ public class GroupController {
     @PostMapping()
     public ResponseEntity<ApiResponse<?>> createGroup(@RequestBody GroupCreateRequest request) {
         return groupService.createGroup(request);
+    }
+
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping()
+    public ResponseEntity<ApiResponse<?>> getUsersGroups(
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        String token = accessToken.substring(7);
+        return groupService.getUsersGroup(token);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {
-    List<Group> findByOwnerEmail(String ownerEmail);
-    List<Group> findByParticipantsEmail(String userEmail);
+    List<Group> findByOwner(User owner);
+    List<Group> findByMembers(User member);
+    Group findByOwnerAndGroupId(User owner, Long groupId);
 }

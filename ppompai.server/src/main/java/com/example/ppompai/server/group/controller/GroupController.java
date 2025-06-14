@@ -71,4 +71,15 @@ public class GroupController {
         String token = accessToken.substring(7);
         return groupService.sendInvite(request, token);
     }
+
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @DeleteMapping("/leave")
+    public ResponseEntity<ApiResponse<?>> leaveGroup(
+            @Parameter(hidden = true)
+            @RequestHeader("Authorization") String accessToken,
+            @RequestHeader Long groupId
+    ) {
+        String token = accessToken.substring(7);
+        return groupService.
+    }
 }

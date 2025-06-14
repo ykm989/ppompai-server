@@ -223,4 +223,41 @@ public class GroupService {
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    // 그룹 탈퇴
+    public ResponseEntity<ApiResponse<?>> leaveGroup(String accessToken, Long groupId) {
+        try {
+            if(!jwtTokenProvider.validateToken(accessToken)) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail("Invalid Token"));
+            }
+
+            String userEmail = jwtTokenProvider.getEmail(accessToken);
+            Optional<User> optionalUser = userRepository
+                    .findByEmail(userEmail);
+
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.fail("User Not Found"));
+            }
+
+            User user = optionalUser.get();
+            Group group = groupRepository.findById(groupId)
+                    .orElseThrow();
+
+            if (group.getMembers().contains(user)) {
+                group.getMembers().remove(user);
+                groupRepository.save(group);
+            }
+
+            return ResponseEntity
+                    .ok(ApiResponse.success());
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
 }

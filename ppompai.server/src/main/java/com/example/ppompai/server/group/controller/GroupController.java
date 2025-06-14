@@ -80,6 +80,18 @@ public class GroupController {
             @RequestHeader Long groupId
     ) {
         String token = accessToken.substring(7);
-        return groupService.
+        return groupService.leaveGroup(token, groupId);
+    }
+
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @DeleteMapping("/resign")
+    public ResponseEntity<ApiResponse<?>> resignMember(
+        @Parameter(hidden = true)
+        @RequestHeader("Authorization") String accessToken,
+        @RequestHeader Long groupId,
+        @RequestHeader Long userId
+    ) {
+        String token = accessToken.substring(7);
+        return groupService.resignMember(token, groupId, userId);
     }
 }

@@ -4,6 +4,7 @@ import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
 import com.example.ppompai.server.group.domain.GroupDeleteRequest;
 import com.example.ppompai.server.group.domain.GroupInviteRequest;
+import com.example.ppompai.server.group.domain.GroupUpdateRequest;
 import com.example.ppompai.server.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,6 +38,18 @@ public class GroupController {
     ) {
         String token = accessToken.substring(7);
         return groupService.getUsersGroup(token);
+    }
+
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @PutMapping()
+    public ResponseEntity<ApiResponse<?>> updateGroup(
+            @Parameter(hidden = true)
+            @RequestHeader("Authorization") String accessToken,
+            @RequestHeader("groupId") Long groupId,
+            @RequestBody GroupUpdateRequest request
+    ) {
+        String token = accessToken.substring(7);
+        return groupService.updateGroup(token, groupId, request);
     }
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))

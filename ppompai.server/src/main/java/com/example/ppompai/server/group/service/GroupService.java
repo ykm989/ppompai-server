@@ -9,6 +9,7 @@ import com.example.ppompai.server.common.repository.InvitationRepository;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
 import com.example.ppompai.server.common.repository.GroupRepository;
 import com.example.ppompai.server.group.domain.GroupInviteRequest;
+import com.example.ppompai.server.group.domain.GroupUpdateRequest;
 import com.example.ppompai.server.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -177,6 +178,45 @@ public class GroupService {
                         .status(HttpStatus.CONFLICT)
                         .body(ApiResponse.fail("Group Delete Fail"));
             }
+
+            return ResponseEntity
+                    .ok(ApiResponse.success(group));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // 그룹 업데이트
+    public ResponseEntity<ApiResponse<?>> updateGroup(String accessToken, Long groupId, GroupUpdateRequest request) {
+        try {
+            if(!jwtTokenProvider.validateToken(accessToken)) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail("Invalid Token"));
+            }
+
+            String userEmail = jwtTokenProvider.getEmail(accessToken);
+            Optional<User> optionalUser = userRepository
+                    .findByEmail(userEmail);
+
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.fail("User Not Found"));
+            }
+
+            User user = optionalUser.get();
+            Group group = groupRepository.findById(groupId)
+                    .orElseThrow();
+
+            if (!group.getOwner().equals(user)) {
+                throw new NoSuchElementException();
+            }
+
+            group.setGroupName(request.getGroupName());
+            groupRepository.save(group);
 
             return ResponseEntity
                     .ok(ApiResponse.success(group));

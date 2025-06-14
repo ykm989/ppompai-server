@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,7 +31,6 @@ public class GroupService {
     // 그룹 생성
     public ResponseEntity<ApiResponse<?>> createGroup(GroupCreateRequest request, String accessToken) {
         try {
-
             if(!jwtTokenProvider.validateToken(accessToken)) {
                 return ResponseEntity
                         .status(HttpStatus.UNAUTHORIZED)
@@ -180,6 +180,43 @@ public class GroupService {
 
             return ResponseEntity
                     .ok(ApiResponse.success(group));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // 개별 그룹 정보 조회
+    public ResponseEntity<ApiResponse<?>> getGroupInfo(String accessToken, Long groupId) {
+        try {
+            if(!jwtTokenProvider.validateToken(accessToken)) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail("Invalid Token"));
+            }
+
+            String userEmail = jwtTokenProvider.getEmail(accessToken);
+            Optional<User> optionalUser = userRepository
+                    .findByEmail(userEmail);
+
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.fail("User Not Found"));
+            }
+
+            User user = optionalUser.get();
+            Group group = groupRepository.findById(groupId)
+                    .orElseThrow();
+
+            if (group.getOwner().equals(user) || group.getMembers().contains(user)) {
+                return ResponseEntity
+                        .ok(ApiResponse.success(group));
+            } else {
+                throw new NoSuchElementException();
+            }
+
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)

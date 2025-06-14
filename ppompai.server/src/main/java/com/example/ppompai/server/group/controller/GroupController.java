@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class GroupController {
     private final GroupService groupService;
 
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping()
     public ResponseEntity<ApiResponse<?>> createGroup(
             @Parameter(hidden = true)
@@ -36,6 +37,17 @@ public class GroupController {
     ) {
         String token = accessToken.substring(7);
         return groupService.getUsersGroup(token);
+    }
+
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/info")
+    public ResponseEntity<ApiResponse<?>> getGroupInfo(
+            @Parameter(hidden = true)
+            @RequestHeader("Authorization") String accessToken,
+            @RequestHeader("groupId") Long groupId
+    ) {
+        String token = accessToken.substring(7);
+        return groupService.getGroupInfo(token, groupId);
     }
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))

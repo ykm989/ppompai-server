@@ -76,8 +76,8 @@ public class AuthService {
             String accessToken = jwtTokenProvider.createAccessToken(userOpt.get());
             String refreshToken = jwtTokenProvider.createRefreshToken(userOpt.get());
 
-            UserRefreshToken userRefreshToken = userRefreshTokenRepository.findById(userOpt.get().user_id)
-                    .orElseThrow(() -> new IllegalStateException("Refresh token entity not found for user: " + userOpt.get().user_id));
+            UserRefreshToken userRefreshToken = userRefreshTokenRepository.findById(userOpt.get().userId)
+                    .orElseThrow(() -> new IllegalStateException("Refresh token entity not found for user: " + userOpt.get().userId));
 
             userRefreshToken.setRefreshToken(refreshToken);
             userRefreshTokenRepository.save(userRefreshToken);
@@ -150,14 +150,14 @@ public class AuthService {
                     () -> new InvalidRequestStateException("user does not exist")
             );
 
-            if (!userRepository.existsById(user.user_id)) {
+            if (!userRepository.existsById(user.userId)) {
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(ApiResponse.fail("user does not exist"));
             }
 
-            userRefreshTokenRepository.deleteById(user.user_id);
-            userRepository.deleteById(user.user_id);
+            userRefreshTokenRepository.deleteById(user.userId);
+            userRepository.deleteById(user.userId);
 
             return ResponseEntity
                     .ok(ApiResponse.success(user));

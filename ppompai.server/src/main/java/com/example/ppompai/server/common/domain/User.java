@@ -13,16 +13,14 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long user_id;
+    @Column(name = "user_id")
+    public Long userId;
 
     @Column(length = 100, nullable = false, unique = true)
     public String email;
 
     @Column(length = 100, nullable = false)
     public String password;
-
-    @Column(length = 512)
-    public String refreshToken;
 
     @ManyToMany(mappedBy = "members", cascade = CascadeType.ALL)
     private List<Group> joinedGroups;

@@ -1,10 +1,9 @@
 package com.example.ppompai.server.auth.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.example.ppompai.server.common.domain.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -17,13 +16,20 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserRefreshToken {
     @Id
     private Long id;
 
-    @Column(length = 512, nullable = false)
+    @OneToOne()
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "refresh_token", length = 512, nullable = false)
     private String refreshToken;
 
     @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }

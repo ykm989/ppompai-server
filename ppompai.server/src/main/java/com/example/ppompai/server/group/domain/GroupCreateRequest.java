@@ -8,7 +8,4 @@ import lombok.Data;
 public class GroupCreateRequest {
     @NotBlank
     private String groupName;
-
-    @NotBlank
-    private User owner;
 }

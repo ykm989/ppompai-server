@@ -43,12 +43,12 @@ public class AuthService {
             String accessToken = jwtTokenProvider.createAccessToken(user);
             String refreshToken = jwtTokenProvider.createRefreshToken(user);
 
-            UserRefreshToken urt = new UserRefreshToken(
-                    user.id,
-                    refreshToken,
-                    null
-            );
-            userRefreshTokenRepository.save(urt);
+            UserRefreshToken userRefreshToken = new UserRefreshToken().builder()
+                    .user(user)
+                    .refreshToken(refreshToken)
+                    .build();
+
+            userRefreshTokenRepository.save(userRefreshToken);
             TokenDTO tokenDTO = new TokenDTO(accessToken, refreshToken);
 
             return ResponseEntity
@@ -76,12 +76,12 @@ public class AuthService {
             String accessToken = jwtTokenProvider.createAccessToken(userOpt.get());
             String refreshToken = jwtTokenProvider.createRefreshToken(userOpt.get());
 
-            UserRefreshToken urt = new UserRefreshToken(
-                    userOpt.get().id,
-                    refreshToken,
-                    null
-            );
-            userRefreshTokenRepository.save(urt);
+            UserRefreshToken userRefreshToken = userRefreshTokenRepository.findById(userOpt.get().user_id)
+                    .orElseThrow(() -> new IllegalStateException("Refresh token entity not found for user: " + userOpt.get().user_id));
+
+            userRefreshToken.setRefreshToken(refreshToken);
+            userRefreshTokenRepository.save(userRefreshToken);
+
             TokenDTO tokenDTO = new TokenDTO(accessToken, refreshToken);
 
             return ResponseEntity
@@ -111,8 +111,7 @@ public class AuthService {
                     () -> new InvalidRequestStateException("user does not exist")
             );
 
-            Optional<UserRefreshToken> refreshTokenOptional = userRefreshTokenRepository
-                    .findById(user.id);
+            Optional<UserRefreshToken> refreshTokenOptional = userRefreshTokenRepository.findByUser(user);
 
             if (refreshTokenOptional.isEmpty() || refreshTokenOptional.get().equals(oldRefreshToken)) {
                 return ResponseEntity
@@ -151,14 +150,14 @@ public class AuthService {
                     () -> new InvalidRequestStateException("user does not exist")
             );
 
-            if (!userRepository.existsById(user.id)) {
+            if (!userRepository.existsById(user.user_id)) {
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(ApiResponse.fail("user does not exist"));
             }
 
-            userRefreshTokenRepository.deleteById(user.id);
-            userRepository.deleteById(user.id);
+            userRefreshTokenRepository.deleteById(user.user_id);
+            userRepository.deleteById(user.user_id);
 
             return ResponseEntity
                     .ok(ApiResponse.success(user));

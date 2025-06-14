@@ -3,6 +3,7 @@ package com.example.ppompai.server.group.controller;
 import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
 import com.example.ppompai.server.group.domain.GroupDeleteRequest;
+import com.example.ppompai.server.group.domain.GroupInviteRequest;
 import com.example.ppompai.server.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,5 +47,16 @@ public class GroupController {
     ) {
         String token = accessToken.substring(7);
         return groupService.deleteGroup(token, request.groupId);
+    }
+
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/invite")
+    public ResponseEntity<ApiResponse<?>> sendInvite(
+            @Parameter(hidden = true)
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody GroupInviteRequest request
+    ) {
+        String token = accessToken.substring(7);
+        return groupService.sendInvite(request, token);
     }
 }

@@ -3,9 +3,12 @@ package com.example.ppompai.server.group.service;
 import com.example.ppompai.server.auth.repository.UserRepository;
 import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.common.domain.Group;
+import com.example.ppompai.server.common.domain.Invitation;
 import com.example.ppompai.server.common.domain.User;
+import com.example.ppompai.server.common.repository.InvitationRepository;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
 import com.example.ppompai.server.common.repository.GroupRepository;
+import com.example.ppompai.server.group.domain.GroupInviteRequest;
 import com.example.ppompai.server.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final InvitationRepository invitationRepository;
 
     // 그룹 생성
     public ResponseEntity<ApiResponse<?>> createGroup(GroupCreateRequest request, String accessToken) {
@@ -98,6 +102,45 @@ public class GroupService {
                     .ok(ApiResponse.success(userGroups));
         }
         catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    public ResponseEntity<ApiResponse<?>> sendInvite(GroupInviteRequest request, String accessToken) {
+        try {
+            if(!jwtTokenProvider.validateToken(accessToken)) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail("Invalid Token"));
+            }
+
+            String userEmail = jwtTokenProvider.getEmail(accessToken);
+            Optional<User> optionalUser = userRepository
+                    .findByEmail(userEmail);
+
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.fail("User Not Found"));
+            }
+            User user = optionalUser.get();
+            Group group = groupRepository.findByOwnerAndGroupId(user, request.groupId);
+
+            if (group != null) {
+                Invitation invitation = Invitation.builder()
+                        .invitee(user)
+                        .group(group)
+                        .status("Invited")
+                        .build();
+
+                invitationRepository.save(invitation);
+            }
+
+            return ResponseEntity
+                    .ok(ApiResponse.success());
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(e.getMessage()));

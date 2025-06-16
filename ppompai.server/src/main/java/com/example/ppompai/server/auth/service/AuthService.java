@@ -135,27 +135,8 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity<ApiResponse<?>> signout(String accessToken) {
+    public ResponseEntity<ApiResponse<?>> signout(User user) {
         try {
-            System.out.println(accessToken);
-            System.out.println(jwtTokenProvider.validateToken(accessToken));
-            if (!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("invalid refresh token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            User user = userRepository.findByEmail(userEmail).orElseThrow(
-                    () -> new InvalidRequestStateException("user does not exist")
-            );
-
-            if (!userRepository.existsById(user.userId)) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("user does not exist"));
-            }
-
             userRefreshTokenRepository.deleteById(user.userId);
             userRepository.deleteById(user.userId);
 

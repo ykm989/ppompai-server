@@ -6,6 +6,7 @@ import com.example.ppompai.server.auth.domain.SignupRequest;
 import com.example.ppompai.server.auth.domain.TokenDTO;
 import com.example.ppompai.server.auth.service.AuthService;
 import com.example.ppompai.server.common.ApiResponse;
+import com.example.ppompai.server.common.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -38,10 +39,8 @@ public class AuthController {
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/signout")
     public ResponseEntity<ApiResponse<?>> signOut(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken
+            @RequestAttribute User user
     ) {
-        String token = accessToken.substring(7);
-        return authService.signout(token);
+        return authService.signout(user);
     }
 }

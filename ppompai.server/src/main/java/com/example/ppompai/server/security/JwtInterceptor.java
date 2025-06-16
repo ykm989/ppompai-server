@@ -1,10 +1,14 @@
 package com.example.ppompai.server.security;
 
 import com.example.ppompai.server.auth.repository.UserRepository;
+import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.common.domain.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -16,6 +20,7 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -23,13 +28,36 @@ public class JwtInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization").substring(7);
 
         if (token == null || !jwtTokenProvider.validateToken(token)) {
-            response.sendError(401, "Invalid token");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json;charset=UTF-8");
+
+            ApiResponse<Void> body = ApiResponse.fail("Invalid Token");
+            String json = objectMapper.writeValueAsString(body);
+
+            response.getWriter().write(json);
+            response.getWriter().flush();
+
             return false;
         }
 
         String userEmail = jwtTokenProvider.getEmail(token);
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow();
+        Optional<User> optionalUser = userRepository
+                .findByEmail(userEmail);
+
+        if (optionalUser.isEmpty()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json;charset=UTF-8");
+
+            ApiResponse<Void> body = ApiResponse.fail("Invalid Token");
+            String json = objectMapper.writeValueAsString(body);
+
+            response.getWriter().write(json);
+            response.getWriter().flush();
+
+            return false;
+        }
+
+        User user = optionalUser.get();
 
         request.setAttribute("user", user);
 

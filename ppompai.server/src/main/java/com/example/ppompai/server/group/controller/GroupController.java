@@ -1,8 +1,8 @@
 package com.example.ppompai.server.group.controller;
 
 import com.example.ppompai.server.common.ApiResponse;
+import com.example.ppompai.server.common.domain.User;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
-import com.example.ppompai.server.group.domain.GroupDeleteRequest;
 import com.example.ppompai.server.group.domain.GroupInviteRequest;
 import com.example.ppompai.server.group.domain.GroupUpdateRequest;
 import com.example.ppompai.server.group.service.GroupService;
@@ -13,98 +13,83 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/groups")
 @RequiredArgsConstructor
 public class GroupController {
     private final GroupService groupService;
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 그룹 생성
     @PostMapping()
     public ResponseEntity<ApiResponse<?>> createGroup(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken,
+            @RequestAttribute User user,
             @RequestBody GroupCreateRequest request
     ) {
-        String token = accessToken.substring(7);
-        return groupService.createGroup(request, token);
+        return groupService.createGroup(request, user);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 그룹 목록 가져오기
     @GetMapping()
     public ResponseEntity<ApiResponse<?>> getUsersGroups(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken
+            @RequestAttribute User user
     ) {
-        String token = accessToken.substring(7);
-        return groupService.getUsersGroup(token);
+        return groupService.getUsersGroup(user);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 그룹 정보 갱신
     @PutMapping()
     public ResponseEntity<ApiResponse<?>> updateGroup(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken,
+            @RequestAttribute User user,
             @RequestHeader("groupId") Long groupId,
             @RequestBody GroupUpdateRequest request
     ) {
-        String token = accessToken.substring(7);
-        return groupService.updateGroup(token, groupId, request);
+        return groupService.updateGroup(request, groupId, user);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 개별 그룹 정보 조회
     @GetMapping("/info")
     public ResponseEntity<ApiResponse<?>> getGroupInfo(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken,
+            @RequestAttribute User user,
             @RequestHeader("groupId") Long groupId
     ) {
-        String token = accessToken.substring(7);
-        return groupService.getGroupInfo(token, groupId);
+        return groupService.getGroupInfo(user, groupId);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 그룹 삭제
     @DeleteMapping()
     public ResponseEntity<ApiResponse<?>> deleteGroup(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken,
-            @RequestBody GroupDeleteRequest request
+            @RequestAttribute User user,
+            @RequestHeader("groupId") Long groupId
     ) {
-        String token = accessToken.substring(7);
-        return groupService.deleteGroup(token, request.groupId);
+        return groupService.deleteGroup(user, groupId);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 그룹 유저 초대
     @PostMapping("/invite")
     public ResponseEntity<ApiResponse<?>> sendInvite(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken,
+            @RequestAttribute User user,
             @RequestBody GroupInviteRequest request
     ) {
-        String token = accessToken.substring(7);
-        return groupService.sendInvite(request, token);
+        return groupService.sendInvite(request, user);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 그룹 탈퇴
     @DeleteMapping("/leave")
     public ResponseEntity<ApiResponse<?>> leaveGroup(
-            @Parameter(hidden = true)
-            @RequestHeader("Authorization") String accessToken,
+            @RequestAttribute User user,
             @RequestHeader Long groupId
     ) {
-        String token = accessToken.substring(7);
-        return groupService.leaveGroup(token, groupId);
+        return groupService.leaveGroup(user, groupId);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    // 그룹 멤버 강퇴
     @DeleteMapping("/resign")
     public ResponseEntity<ApiResponse<?>> resignMember(
-        @Parameter(hidden = true)
-        @RequestHeader("Authorization") String accessToken,
-        @RequestHeader Long groupId,
-        @RequestHeader Long userId
+            @RequestAttribute User user,
+            @RequestHeader Long groupId,
+            @RequestHeader Long targetId
     ) {
-        String token = accessToken.substring(7);
-        return groupService.resignMember(token, groupId, userId);
+        return groupService.resignMember(user, groupId, targetId);
     }
 }

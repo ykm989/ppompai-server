@@ -30,26 +30,8 @@ public class GroupService {
     private final InvitationRepository invitationRepository;
 
     // 그룹 생성
-    public ResponseEntity<ApiResponse<?>> createGroup(GroupCreateRequest request, String accessToken) {
+    public ResponseEntity<ApiResponse<?>> createGroup(GroupCreateRequest request, User user) {
         try {
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-
-            User user = optionalUser.get();
-
             Group newGroup = Group.builder()
                     .groupName(request.getGroupName())
                     .owner(user)
@@ -74,29 +56,11 @@ public class GroupService {
     }
 
     // 유저 그룹 목록 가져오기
-    public ResponseEntity<ApiResponse<?>> getUsersGroup(String accessToken) {
+    public ResponseEntity<ApiResponse<?>> getUsersGroup(User user) {
         try {
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-
-            User user = optionalUser.get();
             Set<Group> userGroups = new HashSet<>();
-            System.out.println(userGroups);
+
             userGroups.addAll(groupRepository.findByOwner(user));
-            System.out.println(userGroups);
             userGroups.addAll(groupRepository.findByMembers(user));
 
             return ResponseEntity
@@ -109,24 +73,9 @@ public class GroupService {
         }
     }
 
-    public ResponseEntity<ApiResponse<?>> sendInvite(GroupInviteRequest request, String accessToken) {
+    // 초대 보내기
+    public ResponseEntity<ApiResponse<?>> sendInvite(GroupInviteRequest request, User user) {
         try {
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-            User user = optionalUser.get();
             Group group = groupRepository.findByOwnerAndGroupId(user, request.groupId);
 
             if (group != null) {
@@ -149,26 +98,8 @@ public class GroupService {
     }
 
     // 그룹 삭제
-    public ResponseEntity<ApiResponse<?>> deleteGroup(String accessToken, String id) {
+    public ResponseEntity<ApiResponse<?>> deleteGroup(User user, Long groupId) {
         try {
-            long groupId = Long.valueOf(id);
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-
-            User user = optionalUser.get();
             Group group = groupRepository.findByOwnerAndGroupId(user, groupId);
             groupRepository.delete(group);
 
@@ -189,25 +120,8 @@ public class GroupService {
     }
 
     // 그룹 업데이트
-    public ResponseEntity<ApiResponse<?>> updateGroup(String accessToken, Long groupId, GroupUpdateRequest request) {
+    public ResponseEntity<ApiResponse<?>> updateGroup(GroupUpdateRequest request, Long groupId, User user) {
         try {
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-
-            User user = optionalUser.get();
             Group group = groupRepository.findById(groupId)
                     .orElseThrow();
 
@@ -228,25 +142,8 @@ public class GroupService {
     }
 
     // 개별 그룹 정보 조회
-    public ResponseEntity<ApiResponse<?>> getGroupInfo(String accessToken, Long groupId) {
+    public ResponseEntity<ApiResponse<?>> getGroupInfo(User user, Long groupId) {
         try {
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-
-            User user = optionalUser.get();
             Group group = groupRepository.findById(groupId)
                     .orElseThrow();
 
@@ -265,25 +162,8 @@ public class GroupService {
     }
 
     // 그룹 탈퇴
-    public ResponseEntity<ApiResponse<?>> leaveGroup(String accessToken, Long groupId) {
+    public ResponseEntity<ApiResponse<?>> leaveGroup(User user, Long groupId) {
         try {
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-
-            User user = optionalUser.get();
             Group group = groupRepository.findById(groupId)
                     .orElseThrow();
 
@@ -302,26 +182,9 @@ public class GroupService {
     }
 
     // 그룹 멤버 강퇴
-    public ResponseEntity<ApiResponse<?>> resignMember(String accessToken, Long groupId, Long userId) {
+    public ResponseEntity<ApiResponse<?>> resignMember(User user, Long groupId, Long targetId) {
         try {
-            if(!jwtTokenProvider.validateToken(accessToken)) {
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponse.fail("Invalid Token"));
-            }
-
-            String userEmail = jwtTokenProvider.getEmail(accessToken);
-            Optional<User> optionalUser = userRepository
-                    .findByEmail(userEmail);
-
-            if (optionalUser.isEmpty()) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body(ApiResponse.fail("User Not Found"));
-            }
-
-            User user = optionalUser.get();
-            User target = userRepository.findById(userId)
+            User target = userRepository.findById(targetId)
                     .orElseThrow();
             Group group = groupRepository.findById(groupId)
                     .orElseThrow();

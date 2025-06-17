@@ -53,4 +53,29 @@ public class InvitationService {
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    // 초대 거절하기
+    public ResponseEntity<ApiResponse<?>> rejectInvite(Long invitationid, User user) {
+        try {
+            Invitation invitation = invitationRepository.findByInvitationId(invitationid);
+
+            if (invitation.invitee.equals(user)) {
+                invitationRepository.delete(invitation);
+            }
+
+            boolean exists = invitationRepository.existsById(invitationid);
+            if(exists) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(ApiResponse.fail("Invitation Rejected Fail"));
+            }
+
+            return ResponseEntity
+                    .ok(ApiResponse.success());
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
 }

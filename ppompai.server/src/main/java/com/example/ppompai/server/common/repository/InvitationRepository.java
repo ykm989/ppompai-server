@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     List<Invitation> findByinvitee(User invitee);
+    Invitation findByInvitationId(Long invitationId);
 }

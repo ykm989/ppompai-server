@@ -26,7 +26,7 @@ public class Invitation {
 
     @ManyToOne
     @JoinColumn(name = "invitee_id", nullable = false)
-    private User invitee;
+    public User invitee;
 
     @Column(length = 20, nullable = false)
     private String status;

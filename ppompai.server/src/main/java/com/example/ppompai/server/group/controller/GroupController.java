@@ -3,12 +3,8 @@ package com.example.ppompai.server.group.controller;
 import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.common.domain.User;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
-import com.example.ppompai.server.group.domain.GroupInviteRequest;
 import com.example.ppompai.server.group.domain.GroupUpdateRequest;
 import com.example.ppompai.server.group.service.GroupService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,15 +59,6 @@ public class GroupController {
             @RequestHeader("groupId") Long groupId
     ) {
         return groupService.deleteGroup(user, groupId);
-    }
-
-    // 그룹 유저 초대
-    @PostMapping("/invite")
-    public ResponseEntity<ApiResponse<?>> sendInvite(
-            @RequestAttribute User user,
-            @RequestBody GroupInviteRequest request
-    ) {
-        return groupService.sendInvite(request, user);
     }
 
     // 그룹 탈퇴

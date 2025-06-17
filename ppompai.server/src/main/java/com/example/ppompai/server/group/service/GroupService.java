@@ -3,12 +3,10 @@ package com.example.ppompai.server.group.service;
 import com.example.ppompai.server.auth.repository.UserRepository;
 import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.common.domain.Group;
-import com.example.ppompai.server.common.domain.Invitation;
 import com.example.ppompai.server.common.domain.User;
 import com.example.ppompai.server.common.repository.InvitationRepository;
 import com.example.ppompai.server.group.domain.GroupCreateRequest;
 import com.example.ppompai.server.common.repository.GroupRepository;
-import com.example.ppompai.server.group.domain.GroupInviteRequest;
 import com.example.ppompai.server.group.domain.GroupUpdateRequest;
 import com.example.ppompai.server.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -67,30 +65,6 @@ public class GroupService {
                     .ok(ApiResponse.success(userGroups));
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
-    }
-
-    // 초대 보내기
-    public ResponseEntity<ApiResponse<?>> sendInvite(GroupInviteRequest request, User user) {
-        try {
-            Group group = groupRepository.findByOwnerAndGroupId(user, request.groupId);
-
-            if (group != null) {
-                Invitation invitation = Invitation.builder()
-                        .invitee(user)
-                        .group(group)
-                        .status("Invited")
-                        .build();
-
-                invitationRepository.save(invitation);
-            }
-
-            return ResponseEntity
-                    .ok(ApiResponse.success());
-        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(e.getMessage()));

@@ -33,11 +33,20 @@ public class InvitationController {
     }
 
     // 초대 거절하기
-    @DeleteMapping("/reject")
+    @PostMapping("/reject")
     public ResponseEntity<ApiResponse<?>> rejectInvite(
             @RequestAttribute User user,
             @RequestHeader Long invitationId
     ) {
         return invitationService.rejectInvite(invitationId, user);
+    }
+
+    // 초대 수락하기
+    @PostMapping("/accept")
+    public ResponseEntity<ApiResponse<?>> acceptInvite(
+            @RequestAttribute User user,
+            @RequestHeader Long invitationId
+    ) {
+        return invitationService.acceptInvite(invitationId, user);
     }
 }

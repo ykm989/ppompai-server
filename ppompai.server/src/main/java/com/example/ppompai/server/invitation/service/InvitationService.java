@@ -1,5 +1,6 @@
 package com.example.ppompai.server.invitation.service;
 
+import com.example.ppompai.server.auth.repository.UserRepository;
 import com.example.ppompai.server.common.ApiResponse;
 import com.example.ppompai.server.common.domain.Group;
 import com.example.ppompai.server.common.domain.Invitation;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InvitationService {
 
+    private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final InvitationRepository invitationRepository;
 
@@ -34,10 +36,11 @@ public class InvitationService {
     public ResponseEntity<ApiResponse<?>> sendInvite(GroupInvitationRequest request, User user) {
         try {
             Group group = groupRepository.findByOwnerAndGroupId(user, request.groupId);
+            User inviteeUser = userRepository.findByUserId(request.inviteeId);
 
             if (group != null) {
                 Invitation invitation = Invitation.builder()
-                        .invitee(user)
+                        .invitee(inviteeUser)
                         .group(group)
                         .status("Invited")
                         .build();
@@ -68,6 +71,35 @@ public class InvitationService {
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(ApiResponse.fail("Invitation Rejected Fail"));
+            }
+
+            return ResponseEntity
+                    .ok(ApiResponse.success());
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // 초대 수락하기
+    public ResponseEntity<ApiResponse<?>> acceptInvite(Long invitationid, User user) {
+        try {
+            Invitation invitation = invitationRepository.findByInvitationId(invitationid);
+
+            if (invitation.invitee.equals(user)) {
+                Group group = invitation.group;
+                group.getMembers().add(user);
+                groupRepository.save(group);
+
+                invitationRepository.delete(invitation);
+            }
+
+            boolean exists = invitationRepository.existsById(invitationid);
+            if(exists) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body(ApiResponse.fail("Invitation Accept Fail"));
             }
 
             return ResponseEntity
